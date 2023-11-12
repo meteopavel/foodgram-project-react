@@ -1,0 +1,73 @@
+from django.contrib.auth import get_user_model
+from django.db import models
+
+User = get_user_model()
+
+
+class Tag(models.Model):
+    name = models.CharField(
+        max_length=256,
+        unique=True,
+        verbose_name='Название тега'
+    )
+    color = models.CharField(
+        max_length=32,
+        verbose_name='Цвет тега'
+    )
+    slug = models.SlugField(
+        verbose_name='Slug тега'
+    )
+
+
+class Ingredient(models.Model):
+    name = models.CharField(
+        max_length=256,
+        unique=True,
+        verbose_name='Название ингредиента'
+    )    
+    measurement_unit = models.CharField(
+        max_length=10,
+        verbose_name='Единица измерения'
+    )    
+
+
+class Recipe(models.Model):
+    name = models.CharField(
+        max_length=256,
+        unique=True,
+        verbose_name='Название рецепта'
+    )
+    text = models.TextField(
+        verbose_name='Текст рецепта'
+    )
+    author = models.ForeignKey(
+        User, related_name='recipes',
+        on_delete=models.CASCADE,
+        verbose_name='Автор рецепта'
+    )
+    is_favorited = models.BooleanField(
+        'Избранное',
+        default=False,
+        help_text='Поставьте галочку, чтобы добавить в избранное.'
+    )
+    is_in_shopping_cart = models.BooleanField(
+        'В списке покупок',
+        default=False,
+        help_text='Поставьте галочку, чтобы добавить в список покупок.'
+    )
+    image = models.ImageField(
+        upload_to='recipes/images/',
+        null=True,
+        default=None,
+        verbose_name='Изображение блюда'
+    )
+    cooking_time = models.IntegerField(
+        verbose_name='Время приготовления'
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
