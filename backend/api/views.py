@@ -1,13 +1,27 @@
-from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.pagination import LimitOffsetPagination
 
-from api.serializers import RecipeSerializer
-from recipes.models import Recipe
+from api.serializers import (IngredientSerializer, RecipeSerializer,
+                             TagSerializer)
+from recipes.models import Ingredient, Recipe, Tag
 
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name',)
+    pagination_class = None
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = (AllowAny,)
+    pagination_class = LimitOffsetPagination
