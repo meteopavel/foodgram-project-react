@@ -1,0 +1,78 @@
+##############################
+###    COMMON VARIABLES    ###
+##############################
+@contentType = application/json
+@email = email@email.ru
+@username = vasya
+@password = lili5555
+
+
+##############################
+### SOME OF USERS REQUESTS ###
+##############################
+
+### anonim GET user list 200
+GET http://127.0.0.1:8000/api/users/
+
+### user GET users/me/ list 200
+GET http://127.0.0.1:8000/api/users/me/
+
+
+
+##############################
+### SOME OF TOKEN REQUESTS ###
+##############################
+
+### anonim CREATE USER 200 if user does not exist
+POST http://127.0.0.1:8000/api/users/
+Content-Type: {{contentType}}
+
+{
+    "email": "{{email}}",
+    "username": "{{username}}",
+    "first_name": "Вася",
+    "last_name": "Пупкин",
+    "password": "{{password}}"
+}
+
+### anonim GET TOKEN for existing user 201
+POST http://127.0.0.1:8000/api/auth/token/login/
+Content-Type: {{contentType}}
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+### user DESTROY TOKEN 204
+POST http://127.0.0.1:8000/api/auth/token/logout/
+
+
+### anonim CREATE USER WITH BAD USERNAME 400
+POST http://127.0.0.1:8000/api/users/
+Content-Type: {{contentType}}
+
+{
+    "username": "InvalidU$ername",
+    "email": "invalid-username@user.ru",
+    "first_name": "Invalid",
+    "last_name": "Username",
+    "password": "{{password}}"
+}
+
+
+##############################
+### SOME OF TAGS REQUESTS ####
+##############################
+
+### anonim GET tags 200
+GET http://127.0.0.1:8000/api/tags/
+
+### anonim POST tags 405
+POST http://127.0.0.1:8000/api/tags/
+
+{
+    "name": "Завтрак",
+    "color": "#E26CFD",
+    "slug": "breakfast"
+}

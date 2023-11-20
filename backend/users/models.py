@@ -1,12 +1,15 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from users.validators import validate_username
+
 
 class User(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=128,
-        unique=True
+        unique=True,
+        validators=(validate_username,)
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
@@ -18,7 +21,7 @@ class User(AbstractUser):
         max_length=128,
     )
     last_name = models.CharField(
-        verbose_name='Имя',
+        verbose_name='Фамилия',
         max_length=128,
     )
     is_subscribed = models.BooleanField(
@@ -26,6 +29,7 @@ class User(AbstractUser):
         default=False,
         help_text='Поставьте галочку, чтобы подписать.'
     )
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     class Meta:
         ordering = ('username',)

@@ -9,14 +9,19 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name',
-                  'last_name', 'is_subscribed',)
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed')
+
+
+class TokenSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit', 'amount')
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -27,9 +32,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
-    author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
-    )
+    author = UserSerializer(read_only=True)
     ingredients = IngredientSerializer(many=True)
 
     class Meta:
