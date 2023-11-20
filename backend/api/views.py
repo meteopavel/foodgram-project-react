@@ -15,12 +15,12 @@ from recipes.models import Ingredient, Recipe, Tag
 
 User = get_user_model()
 
-"""
+
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
-"""
+
 
 class ProfileViewSet(ModelViewSet):
     serializer_class = UserSerializer
