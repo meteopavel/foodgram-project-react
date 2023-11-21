@@ -1,54 +1,49 @@
-from django.contrib.auth import authenticate, get_user_model
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.viewsets import (GenericViewSet, ReadOnlyModelViewSet,
-                                     ModelViewSet)
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import serializers
-
-from api.serializers import (IngredientSerializer, RecipeSerializer,
-                             TagSerializer, TokenSerializer, UserSerializer)
-from recipes.models import Ingredient, Recipe, Tag
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 
-class UserViewSet(ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    pagination_class = LimitOffsetPagination
 
 
-class ProfileViewSet(ModelViewSet):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    #def get_queryset(self, request):
-    #    return get_object_or_404(request.user)
 
 
-class IngredientViewSet(ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name',)
-    pagination_class = None
 
 
-class TagViewSet(ReadOnlyModelViewSet):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    pagination_class = None
 
 
-class RecipeViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
-    pagination_class = LimitOffsetPagination
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 class TokenJWTViewSet(GenericViewSet):
     queryset = User.objects.all()
     serializer_class = TokenSerializer
@@ -81,3 +76,50 @@ class TokenJWTViewSet(GenericViewSet):
 
     def destroy(self, request, *args, **kwargs):
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+"""
+
+"""
+from api.serializers import (IngredientSerializer, RecipeSerializer,
+                             TagSerializer, TokenSerializer,
+                             CustomUserSerializer, UserListSerializer)
+                             """
+
+
+"""
+class IngredientViewSet(ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name',)
+    pagination_class = None
+
+
+class TagViewSet(ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+
+
+class RecipeViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    pagination_class = LimitOffsetPagination
+"""
+
+"""
+from django.contrib.auth import authenticate, get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.viewsets import (GenericViewSet, ReadOnlyModelViewSet,
+                                     ModelViewSet)
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework import serializers
+
+from api.serializers import (TokenSerializer)
+from recipes.models import Ingredient, Recipe, Tag
+"""
