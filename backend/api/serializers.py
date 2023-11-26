@@ -34,7 +34,7 @@ class Base64ImageField(ImageField):
 class RecipeSerializer(ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer(read_only=True)
-    # ingredients = IngredientSerializer(many=True)
+    ingredients = IngredientSerializer(many=True)
     image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -43,8 +43,10 @@ class RecipeSerializer(ModelSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
+    # С этим пока всё непонятно. Нужно доразобраться
+    # https://practicum.yandex.ru/learn/python-developer-plus/courses/ff822384-ebee-4c94-b637-107f18eb1678/sprints/134994/topics/ab7ab7e6-9e2e-400c-9868-189eb5f5fe7e/lessons/e5ee1212-c9e0-49a6-bc19-b95791a38f2a/
     def create(self, validated_data):
-        tags = validated_data.pop('tags')
+        tags = validated_data.pop('tags_id')
         recipe = Recipe.objects.create(**validated_data)
         for tag in tags:
             current_tag = Tag.objects.get_or_create(tag)

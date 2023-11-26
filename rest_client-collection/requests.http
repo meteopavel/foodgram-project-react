@@ -118,6 +118,18 @@ GET http://127.0.0.1:8000/api/ingredients/
 ### anonim GET recipes 200
 GET http://127.0.0.1:8000/api/recipes/
 
+### vasya GET recipes limit 200
+GET http://127.0.0.1:8000/api/recipes/?limit=2
+Authorization: {{vasyaToken}}
+
+### vasya GET recipes filter 200
+GET http://127.0.0.1:8000/api/recipes/?tags=obed
+Authorization: {{vasyaToken}}
+
+### vasya GET recipes filter 200
+GET http://127.0.0.1:8000/api/recipes/4
+Authorization: {{vasyaToken}}
+
 ### vasya POST users/recipes/ 200 results self.user
 POST http://127.0.0.1:8000/api/recipes/
 Authorization: {{anotherVasyaToken}}
