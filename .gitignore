@@ -133,7 +133,5 @@ dmypy.json
 
 # Others
 node_modules
-.media
-.media/
-
+media/
 
