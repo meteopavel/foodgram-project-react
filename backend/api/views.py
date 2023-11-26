@@ -1,92 +1,19 @@
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
+from api.serializers import (TagSerializer, UserSerializer,
+                             IngredientSerializer, RecipeSerializer)
+from recipes.models import Tag, Ingredient, Recipe
 
 User = get_user_model()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-class TokenJWTViewSet(GenericViewSet):
-    queryset = User.objects.all()
-    serializer_class = TokenSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            user_from_email = User.objects.get(
-                email=serializer.validated_data['email']
-            )
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid username/password!")
-
-        user = authenticate(
-            username=user_from_email.username,
-            password=serializer.validated_data['password']
-        )
-        if user is None:
-            raise serializers.ValidationError("Invalid username/password!")
-        if user is not None:
-            token = AccessToken.for_user(user)
-            return Response(
-                {'auth_token': str(token)},
-                status=status.HTTP_200_OK
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-"""
-
-"""
-from api.serializers import (IngredientSerializer, RecipeSerializer,
-                             TagSerializer, TokenSerializer,
-                             CustomUserSerializer, UserListSerializer)
-                             """
-
-
-"""
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -105,7 +32,17 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = LimitOffsetPagination
-"""
+
+
+class UserViewSet(UserViewSet):
+    pagination_class = LimitOffsetPagination
+    serializer_class = UserSerializer
+
+    @action(detail=False,
+            permission_classes=(IsAuthenticated,))
+    def me(self, request, format=None):
+        return Response(self.serializer_class(request.user).data)
+
 
 """
 from django.contrib.auth import authenticate, get_user_model

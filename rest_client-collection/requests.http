@@ -5,17 +5,42 @@
 @email = email@email.ru
 @username = vasya
 @password = lili5555
+@vasyaToken = Token 1ffc39a8ddd151fe8a616bc0369546224be38405
+@anotherVasyaToken = Token 4bfa3e8667a02f738032b503b47b0692e52d3933
 
 
 ##############################
 ### SOME OF USERS REQUESTS ###
 ##############################
 
-### anonim GET user list 200
+### anonim GET user list 200 results empty
 GET http://127.0.0.1:8000/api/users/
 
-### user GET users/me/ list 200
+### vasya GET user list 200 results self.user
+GET http://127.0.0.1:8000/api/users/
+Authorization: {{vasyaToken}}
+
+### vasya GET user limit 200 results self.user
+GET http://127.0.0.1:8000/api/users/?limit=1
+Authorization: {{vasyaToken}}
+
+### anonim GET user profile 200 empty
+GET http://127.0.0.1:8000/api/users/1/
+
+### vasya GET user profile 200 results self.user
+GET http://127.0.0.1:8000/api/users/4/
+Authorization: {{vasyaToken}}
+
+### anotherVasya GET user profile 200 results self.user
+GET http://127.0.0.1:8000/api/users/1/
+Authorization: {{anotherVasyaToken}}
+
+### anonim GET users/me/ 401
 GET http://127.0.0.1:8000/api/users/me/
+
+### vasya GET users/me/ 200 results self.user
+GET http://127.0.0.1:8000/api/users/me/
+Authorization: {{vasyaToken}}
 
 
 
@@ -61,9 +86,9 @@ Content-Type: {{contentType}}
 }
 
 
-##############################
-### SOME OF TAGS REQUESTS ####
-##############################
+#############################
+### SOME OF TAGS REQUESTS ###
+#############################
 
 ### anonim GET tags 200
 GET http://127.0.0.1:8000/api/tags/
@@ -75,4 +100,46 @@ POST http://127.0.0.1:8000/api/tags/
     "name": "Завтрак",
     "color": "#E26CFD",
     "slug": "breakfast"
+}
+
+
+###################################
+### SOME OF INGREDIENT REQUESTS ###
+###################################
+
+### anonim GET ingredients 200
+GET http://127.0.0.1:8000/api/ingredients/
+
+
+################################
+### SOME OF RECIPES REQUESTS ###
+################################
+
+### anonim GET recipes 200
+GET http://127.0.0.1:8000/api/recipes/
+
+### vasya POST users/recipes/ 200 results self.user
+POST http://127.0.0.1:8000/api/recipes/
+Authorization: {{anotherVasyaToken}}
+Content-Type: {{contentType}}
+
+{
+    "ingredients": [
+        {
+            "id": 1,
+            "amount": 10
+        },
+        {
+            "id": 2,
+            "amount": 20
+        }
+    ],
+    "tags": [
+        1,
+        2
+    ],
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+    "name": "Нечто съедобное (это не точно)",
+    "text": "Приготовьте как нибудь эти ингредиеты",
+    "cooking_time": 5
 }
