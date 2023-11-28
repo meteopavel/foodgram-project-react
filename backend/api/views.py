@@ -38,14 +38,14 @@ class RecipeViewSet(ModelViewSet):
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action in ('create', 'partial_update'):
             return RecipePostSerializer
         return RecipeGetSerializer
 
 
 class UserViewSet(UserViewSet):
-    pagination_class = LimitOffsetPagination
     serializer_class = UserSerializer
+    pagination_class = LimitOffsetPagination
 
     @action(detail=False,
             permission_classes=(IsAuthenticated,))

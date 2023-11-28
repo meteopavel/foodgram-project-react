@@ -90,6 +90,20 @@ class RecipePostSerializer(ModelSerializer):
         recipe.tags.set(tags)
         return recipe
 
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags')
+        instance.tags.clear()
+        instance.tags.set(tags)
+        ingredients = validated_data.pop('ingredients')
+        IngredientRecipe.objects.filter(recipe=instance).delete()
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                recipe=instance,
+                ingredient=(ingredient.get('ingredient'))['id'],
+                amount=ingredient.get('amount')
+            )
+        return super().update(instance, validated_data)
+
     def to_representation(self, instance):
         return RecipeGetSerializer(instance,
                                    context=self.context).data

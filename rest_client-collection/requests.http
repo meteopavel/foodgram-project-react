@@ -127,11 +127,11 @@ GET http://127.0.0.1:8000/api/recipes/?tags=obed
 Authorization: {{vasyaToken}}
 
 ### vasya GET recipe 200
-GET http://127.0.0.1:8000/api/recipes/108
+GET http://127.0.0.1:8000/api/recipes/120
 Authorization: {{vasyaToken}}
 
 ### vasya POST users/recipes/ 201
-PATCH http://127.0.0.1:8000/api/recipes/
+POST http://127.0.0.1:8000/api/recipes/
 Authorization: {{vasyaToken}}
 Content-Type: {{contentType}}
 
@@ -151,13 +151,13 @@ Content-Type: {{contentType}}
         2
     ],
     "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-    "name": "Нечто съедобное (это не точно)",
-    "text": "Приготовьте как нибудь эти ингредиеты",
+    "name": "Нечто несъедобное (это не точно)",
+    "text": "НЕ Приготовьте как нибудь эти ингредиеты",
     "cooking_time": 5
 }
 
-### anotherVasya POST users/recipes/ 201
-PATCH http://127.0.0.1:8000/api/recipes/119/
+### anotherVasya PATCH recipe 200
+PATCH http://127.0.0.1:8000/api/recipes/139/
 Authorization: {{anotherVasyaToken}}
 Content-Type: {{contentType}}
 
@@ -172,7 +172,7 @@ Content-Type: {{contentType}}
         2
     ],
     "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-    "name": "Нечто съедобное (пробовать на свой страх и риск)",
+    "name": "Нечто очень gdfg съедобное (пробовать на свой страх и риск)",
     "text": "Приготовьте как нибудь эти ингредиеты, не забудьте посолить.",
     "cooking_time": 12
 }
