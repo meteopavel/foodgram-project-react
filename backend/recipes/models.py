@@ -34,7 +34,7 @@ class Ingredient(models.Model):
     )
     measurement_unit = models.CharField(
         max_length=10,
-        verbose_name='Единица измерения'
+        verbose_name='Единицы измерения'
     )
 
     def __str__(self):
@@ -106,6 +106,7 @@ class TagRecipe(models.Model):
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    amount = models.IntegerField()
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'

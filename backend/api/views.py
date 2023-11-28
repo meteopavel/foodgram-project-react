@@ -4,11 +4,13 @@ from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
+from api.filters import RecipeFilter
 from api.serializers import (TagSerializer, UserSerializer,
-                             IngredientSerializer, RecipeSerializer)
+                             IngredientSerializer, RecipeGetSerializer,
+                             RecipePostSerializer)
 from recipes.models import Tag, Ingredient, Recipe
 
 User = get_user_model()
@@ -30,10 +32,15 @@ class TagViewSet(ReadOnlyModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeGetSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('author', 'tags__slug')
+    filterset_class = RecipeFilter
     pagination_class = LimitOffsetPagination
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return RecipePostSerializer
+        return RecipeGetSerializer
 
 
 class UserViewSet(UserViewSet):
@@ -44,21 +51,3 @@ class UserViewSet(UserViewSet):
             permission_classes=(IsAuthenticated,))
     def me(self, request, format=None):
         return Response(self.serializer_class(request.user).data)
-
-
-"""
-from django.contrib.auth import authenticate, get_user_model
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.viewsets import (GenericViewSet, ReadOnlyModelViewSet,
-                                     ModelViewSet)
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import serializers
-
-from api.serializers import (TokenSerializer)
-from recipes.models import Ingredient, Recipe, Tag
-"""
