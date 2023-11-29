@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -70,7 +71,7 @@ class Recipe(models.Model):
         help_text='Поставьте галочку, чтобы добавить в список покупок.'
     )
     name = models.CharField(
-        max_length=256,
+        max_length=200,
         unique=True,
         verbose_name='Название рецепта'
     )
@@ -84,6 +85,8 @@ class Recipe(models.Model):
         verbose_name='Текст рецепта'
     )
     cooking_time = models.IntegerField(
+        validators=(
+            MinValueValidator(1, 'Время не может быть ниже 1'),),
         verbose_name='Время приготовления'
     )
 
@@ -106,7 +109,10 @@ class TagRecipe(models.Model):
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.IntegerField()
+    amount = models.IntegerField(
+        validators=(
+            MinValueValidator(1, 'Количество не может быть ниже 1'),)
+    )
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'

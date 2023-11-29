@@ -30,7 +30,7 @@ class User(AbstractUser):
         help_text='Поставьте галочку, чтобы подписать.'
     )
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'is_subscribed']
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     class Meta:
         ordering = ('username',)

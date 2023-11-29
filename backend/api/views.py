@@ -8,8 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import RecipeFilter
-from api.serializers import (TagSerializer, UserSerializer,
-                             IngredientSerializer, RecipeGetSerializer,
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (TagSerializer,
+                             IngredientSerializer,
+                             RecipeGetSerializer,
                              RecipePostSerializer)
 from recipes.models import Tag, Ingredient, Recipe
 
@@ -36,6 +38,7 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
@@ -44,7 +47,6 @@ class RecipeViewSet(ModelViewSet):
 
 
 class UserViewSet(UserViewSet):
-    serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
 
     @action(detail=False,

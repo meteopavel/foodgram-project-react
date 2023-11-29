@@ -129,6 +129,11 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
         'user': ['rest_framework.permissions.AllowAny'],
     },
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserGetSerializer',
+        'current_user': 'api.serializers.UserGetSerializer',
+    },
+    'HIDE_USERS': False,
 }
 
 # Static files (CSS, JavaScript, Images)
