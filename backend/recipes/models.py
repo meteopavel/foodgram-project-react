@@ -5,6 +5,31 @@ from django.db import models
 User = get_user_model()
 
 
+class UserRecipeBaseModel(models.Model):
+    """Базовая модель для списков покупок и избранных рецептов."""
+
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        'recipes.Recipe',
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        default_related_name = '%(class)ss'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='%(app_label)s_%(class)s relation already exists.',
+            )
+        ]
+        abstract = True
+
+
 class Tag(models.Model):
     name = models.CharField(
         max_length=256,
@@ -104,6 +129,25 @@ class TagRecipe(models.Model):
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'
+
+
+class Favorite(UserRecipeBaseModel):
+    class Meta(UserRecipeBaseModel.Meta):
+        verbose_name = 'Избранное'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f'{self.user.username} добавил {self.recipe.name} в избранное.'
+
+
+class ShoppingCart(UserRecipeBaseModel):
+    class Meta(UserRecipeBaseModel.Meta):
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return (f'{self.user.username} добавил'
+                f' {self.recipe.name} в список покупок.')
 
 
 class IngredientRecipe(models.Model):

@@ -5,7 +5,7 @@
 @email = email@email.ru
 @username = vasya
 @password = lili5555
-@vasyaToken = Token 1ffc39a8ddd151fe8a616bc0369546224be38405
+@vasyaToken = Token 1a28b4667fcd94d5c77695608c08bd6bda107d02
 @anotherVasyaToken = Token 4bfa3e8667a02f738032b503b47b0692e52d3933
 
 
@@ -13,7 +13,7 @@
 ### SOME OF USERS REQUESTS ###
 ##############################
 
-### anonim GET user list 200 results empty
+### anonim GET user list 200 'HIDE_USERS': False
 GET http://127.0.0.1:8000/api/users/
 
 ### vasya GET user list 200 results self.user
@@ -24,11 +24,11 @@ Authorization: {{vasyaToken}}
 GET http://127.0.0.1:8000/api/users/?limit=1
 Authorization: {{vasyaToken}}
 
-### anonim GET user profile 200 empty
-GET http://127.0.0.1:8000/api/users/1/
+### anonim GET user profile 200 'HIDE_USERS': False
+GET http://127.0.0.1:8000/api/users/51/
 
 ### vasya GET user profile 200 results self.user
-GET http://127.0.0.1:8000/api/users/4/
+GET http://127.0.0.1:8000/api/users/5/
 Authorization: {{vasyaToken}}
 
 ### anotherVasya GET user profile 200 results self.user
@@ -169,10 +169,20 @@ Content-Type: {{contentType}}
         }
     ],
     "tags": [
-        2
+        2,
+        1
     ],
     "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
     "name": "Нечто очень gdfg съедобное (пробовать на свой страх и риск)",
     "text": "Приготовьте как нибудь эти ингредиеты, не забудьте посолить.",
     "cooking_time": 12
 }
+
+
+#################################
+### SOME OF SHOPPING REQUESTS ###
+#################################
+
+### vasya GET pdf 200 + file
+GET http://127.0.0.1:8000/api/recipes/download_shopping_cart/
+Authorization: {{vasyaToken}}
