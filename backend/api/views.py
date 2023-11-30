@@ -1,6 +1,7 @@
 from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -21,7 +22,7 @@ from api.serializers import (TagSerializer,
                              FavoriteSerializer)
 from api.utils import (draw_pdf_report,
                        _create_related_object,
-                       _delete_related_object)
+                       _delete_related_object,)
 from recipes.models import (Tag, Ingredient, Recipe,
                             ShoppingCart, IngredientRecipe, Favorite)
 from users.models import Subscription
@@ -55,6 +56,18 @@ class RecipeViewSet(ModelViewSet):
         if self.action in ('create', 'partial_update'):
             return RecipePostSerializer
         return RecipeGetSerializer
+
+    def get_queryset(self):
+        queryset = Recipe.objects.select_related(
+            'author'
+        ).prefetch_related(
+            'tags',
+            'ingredients'
+        )
+        return (
+            queryset.get_recipe_filters(self.request.user)
+            if self.request.user.is_authenticated else queryset
+        )
 
     @action(detail=True,
             permission_classes=(IsAuthenticated,), methods=('post',))
@@ -124,6 +137,7 @@ class UserViewSet(UserViewSet):
             methods=('post',))
     def subscribe(self, request, id):
         """Action для работы с подписками пользователей."""
+        get_object_or_404(User, id=id)
         serializer = GetRemoveSubscriptionSerializer(
             data={
                 'user': request.user.id,
@@ -135,6 +149,7 @@ class UserViewSet(UserViewSet):
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, id):
+        get_object_or_404(User, id=id)
         if not Subscription.objects.filter(
                 user=request.user, author_id=id).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)

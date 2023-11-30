@@ -1,8 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import OuterRef, Exists
 
 User = get_user_model()
+
+
+class RecipeQuerySet(models.QuerySet):
+    def get_recipe_filters(self, user):
+        return self.annotate(
+            is_favorited=Exists(Favorite.objects.filter(
+                user_id=user.id,
+                recipe__id=OuterRef('pk')
+            )),
+            is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
+                user_id=user.id,
+                recipe__id=OuterRef('pk')
+            ))
+        ).order_by('-pub_date')
 
 
 class UserRecipeBaseModel(models.Model):
@@ -85,16 +100,6 @@ class Recipe(models.Model):
         Ingredient,
         through='IngredientRecipe'
     )
-    is_favorited = models.BooleanField(
-        'Избранное',
-        default=False,
-        help_text='Поставьте галочку, чтобы добавить в избранное.'
-    )
-    is_in_shopping_cart = models.BooleanField(
-        'В списке покупок',
-        default=False,
-        help_text='Поставьте галочку, чтобы добавить в список покупок.'
-    )
     name = models.CharField(
         max_length=200,
         unique=True,
@@ -114,6 +119,10 @@ class Recipe(models.Model):
             MinValueValidator(1, 'Время не может быть ниже 1'),),
         verbose_name='Время приготовления'
     )
+    pub_date = models.DateTimeField('Дата публикации',
+                                    auto_now_add=True)
+
+    objects = RecipeQuerySet.as_manager()
 
     def __str__(self):
         return self.name

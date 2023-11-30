@@ -8,7 +8,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (CharField, CurrentUserDefault,
                                         HiddenField, ModelSerializer,
                                         ImageField, PrimaryKeyRelatedField,
-                                        SerializerMethodField, ReadOnlyField)
+                                        SerializerMethodField, ReadOnlyField,
+                                        BooleanField)
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.utils import create_ingredients
@@ -58,6 +59,8 @@ class RecipeGetSerializer(ModelSerializer):
     author = UserSerializer(read_only=True)
     ingredients = SerializerMethodField()
     image = Base64ImageField(required=False, allow_null=True)
+    is_in_shopping_cart = BooleanField(default=0)
+    is_favorited = BooleanField(default=0)
 
     class Meta:
         model = Recipe
