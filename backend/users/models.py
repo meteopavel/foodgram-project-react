@@ -3,26 +3,28 @@ from django.contrib.auth.models import AbstractUser
 
 from users.validators import validate_username
 
+MAX_LENGTH = 128
+
 
 class User(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя',
-        max_length=128,
+        max_length=MAX_LENGTH,
         unique=True,
         validators=(validate_username,)
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
-        max_length=128,
+        max_length=MAX_LENGTH,
         unique=True
     )
     first_name = models.CharField(
         verbose_name='Имя',
-        max_length=128,
+        max_length=MAX_LENGTH,
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
-        max_length=128,
+        max_length=MAX_LENGTH,
     )
     is_subscribed = models.BooleanField(
         'Подписан',
@@ -67,4 +69,4 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
 
     def __str__(self):
-        return f'{self.user.username} подписан на {self.author.username}.'
+        return f'{self.user.username} подписался на {self.author.username}.'

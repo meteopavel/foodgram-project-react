@@ -6,25 +6,21 @@ from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import RecipeFilter
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (TagSerializer,
-                             IngredientSerializer,
-                             RecipeGetSerializer,
-                             RecipePostSerializer,
-                             SubscriptionsListSerializer,
-                             GetRemoveSubscriptionSerializer,
-                             ShoppingCartSerializer,
-                             FavoriteSerializer)
-from api.utils import (draw_pdf_report,
-                       _create_related_object,
-                       _delete_related_object,)
-from recipes.models import (Tag, Ingredient, Recipe,
-                            ShoppingCart, IngredientRecipe, Favorite)
+from api.serializers import (FavoriteSerializer, IngredientSerializer,
+                             RecipeGetSerializer, RecipePostSerializer,
+                             ShoppingCartSerializer, SubscriptionSerializer,
+                             SubscriptionsListSerializer, TagSerializer)
+from api.utils import (get_pdf_shopping_list,
+                       create_related_object,
+                       delete_related_object,)
+from recipes.models import (Favorite, Ingredient, IngredientRecipe,
+                            Recipe, ShoppingCart, Tag)
 from users.models import Subscription
 
 User = get_user_model()
@@ -64,25 +60,21 @@ class RecipeViewSet(ModelViewSet):
             'tags',
             'ingredients'
         )
-        return (
-            queryset.get_recipe_filters(self.request.user)
-            if self.request.user.is_authenticated else queryset
-        )
+        return (queryset.get_recipe_extra_obj(self.request.user)
+                if self.request.user.is_authenticated else queryset)
 
-    @action(detail=True,
-            permission_classes=(IsAuthenticated,), methods=('post',))
+    @action(methods=('post',), detail=True,
+            permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
-        """Добавление и удаление рецептов из списка покупок."""
-        return _create_related_object(pk, request, ShoppingCartSerializer)
+        return create_related_object(pk, request, ShoppingCartSerializer)
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk):
-        return _delete_related_object(pk, request, ShoppingCart)
+        return delete_related_object(pk, request, ShoppingCart)
 
-    @action(methods=('get',), detail=False,
+    @action(detail=False,
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
-        """Скачивание списка покупок."""
         ingredients = (
             IngredientRecipe.objects.filter(
                 recipe__shoppingcarts__user=request.user
@@ -90,24 +82,21 @@ class RecipeViewSet(ModelViewSet):
                 'ingredient__name',
                 'ingredient__measurement_unit'
             ).annotate(
-                ingredient_amount=Sum(
-                    'amount'
-                )
+                ingredient_amount=Sum('amount')
             ).order_by(
                 'ingredient__name'
             )
         )
-        return draw_pdf_report(ingredients)
+        return get_pdf_shopping_list(ingredients)
 
-    @action(detail=True,
-            permission_classes=(IsAuthenticated,), methods=('post',))
+    @action(methods=('post',), detail=True,
+            permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk):
-        """Добавление и удаление рецептов из избранного."""
-        return _create_related_object(pk, request, FavoriteSerializer)
+        return create_related_object(pk, request, FavoriteSerializer)
 
     @favorite.mapping.delete
     def unmake_recipe_favorite(self, request, pk):
-        return _delete_related_object(pk, request, Favorite)
+        return delete_related_object(pk, request, Favorite)
 
 
 class UserViewSet(UserViewSet):
@@ -129,19 +118,15 @@ class UserViewSet(UserViewSet):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True, permission_classes=(IsAuthenticated,),
             methods=('post',))
     def subscribe(self, request, id):
-        """Action для работы с подписками пользователей."""
         get_object_or_404(User, id=id)
-        serializer = GetRemoveSubscriptionSerializer(
-            data={
-                'user': request.user.id,
-                'author': id},
+        serializer = SubscriptionSerializer(
+            data={'user': request.user.id, 'author': id},
             context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -151,8 +136,8 @@ class UserViewSet(UserViewSet):
     def unsubscribe(self, request, id):
         get_object_or_404(User, id=id)
         if not Subscription.objects.filter(
-                user=request.user, author_id=id).exists():
+            user=request.user, author_id=id
+        ).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        Subscription.objects.filter(
-            user=request.user, author=id).delete()
+        Subscription.objects.filter(user=request.user, author=id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

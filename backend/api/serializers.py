@@ -120,80 +120,51 @@ class RecipePostSerializer(ModelSerializer):
                                    context=self.context).data
 
 
-class UserSerializer(UserSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'id', 'username', 'first_name',
-                  'last_name', 'is_subscribed')
-
-
-class RecipeMinifiedSerializer(ModelSerializer):
-    """ Уменьшенная версия сериализатора списка рецептов.
-    Используется при взаимодействии со списком покупок."""
-
+class RecipeMiniSerializer(ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class SubscriptionsListSerializer(UserSerializer):
-    """Сериализатор для работы со списком подписок."""
-
-    recipes = SerializerMethodField(method_name='_recipes')
+    recipes = SerializerMethodField(method_name='get_recipes')
     recipes_count = ReadOnlyField(source='recipes.count')
 
     class Meta:
         model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count',
-        )
-        read_only_fields = ('__all__',)
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count',)
 
-    def _recipes(self, obj):
+    def get_recipes(self, obj):
         request = self.context.get('request')
         recipes_limit = None
         if request:
             recipes_limit = request.query_params.get('recipes_limit')
         recipes = obj.recipes.all()
         if recipes_limit:
-            try:
-                recipes = recipes[:int(recipes_limit)]
-            except ValueError:
-                pass
-        return RecipeMinifiedSerializer(recipes, many=True,
-                                        context=self.context).data
+            recipes = recipes[:int(recipes_limit)]
+        return RecipeMiniSerializer(recipes, many=True,
+                                    context=self.context).data
 
 
-class GetRemoveSubscriptionSerializer(ModelSerializer):
-    """Добавление и удаление подписок пользователей."""
-
+class SubscriptionSerializer(ModelSerializer):
     class Meta:
         model = Subscription
         fields = ('author', 'user')
 
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Subscription.objects.all(),
-                fields=('user', 'author'),
-                message='Вы уже подписаны на этого автора.'
-            )
-        ]
+        validators = (UniqueTogetherValidator(
+            queryset=Subscription.objects.all(),
+            fields=('user', 'author'),
+            message='Вы уже подписались на этого автора ранее'),)
+
+    def validate_author(self, obj):
+        if obj == self.context.get('request').user:
+            raise ValidationError('Нельзя подписаться на себя')
+        return obj
 
     def to_representation(self, instance):
         return SubscriptionsListSerializer(instance.author,
                                            context=self.context).data
-
-    def validate_author(self, obj):
-        if obj == self.context.get('request').user:
-            raise ValidationError('Нельзя подписаться на себя.')
-        return obj
 
 
 class FavoriteCartsBaseSerializer(ModelSerializer):
@@ -201,7 +172,7 @@ class FavoriteCartsBaseSerializer(ModelSerializer):
         fields = ('recipe', 'user')
 
     def to_representation(self, instance):
-        return RecipeMinifiedSerializer(
+        return RecipeMiniSerializer(
             instance.recipe,
             context=self.context
         ).data
@@ -211,21 +182,24 @@ class FavoriteCartsBaseSerializer(ModelSerializer):
                 user=self.context.get('request').user,
                 recipe=data.get('recipe')).exists():
             raise ValidationError(
-                f'Вы уже добавили этот рецепт в'
+                f'Рецепт уже добавлен в'
                 f' {self.Meta.model._meta.verbose_name.lower()}'
             )
         return data
 
 
 class FavoriteSerializer(FavoriteCartsBaseSerializer):
-    """ Сериализатор для работы с избранными рецептами."""
-
     class Meta(FavoriteCartsBaseSerializer.Meta):
         model = Favorite
 
 
 class ShoppingCartSerializer(FavoriteCartsBaseSerializer):
-    """ Сериализатор для работы со списком покупок."""
-
     class Meta(FavoriteCartsBaseSerializer.Meta):
         model = ShoppingCart
+
+
+class UserSerializer(UserSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'is_subscribed')
