@@ -37,7 +37,8 @@ class UserRecipeBaseModel(models.Model):
         constraints = (models.UniqueConstraint(
             name='%(app_label)s_%(class)s already exists',
             fields=('user', 'recipe'),
-            ),)
+            ),
+        )
         abstract = True
 
 
