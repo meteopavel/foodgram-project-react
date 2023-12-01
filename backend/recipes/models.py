@@ -34,9 +34,10 @@ class UserRecipeBaseModel(models.Model):
 
     class Meta:
         default_related_name = '%(class)ss'
-        constraints = (models.UniqueConstraint(
-            name='%(app_label)s_%(class)s already exists',
-            fields=('user', 'recipe'),
+        constraints = (
+            models.UniqueConstraint(
+                name='%(app_label)s_%(class)s already exists',
+                fields=('user', 'recipe'),
             ),
         )
         abstract = True
