@@ -5,12 +5,12 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import RecipeFilter
+from api.pagination import PageNumberPagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeGetSerializer, RecipePostSerializer,
@@ -31,13 +31,11 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
-    pagination_class = None
 
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = None
 
 
 class RecipeViewSet(ModelViewSet):
@@ -45,7 +43,7 @@ class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeGetSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     permission_classes = (IsAuthorOrReadOnly,)
 
     def get_serializer_class(self):
@@ -100,12 +98,11 @@ class RecipeViewSet(ModelViewSet):
 
 
 class UserViewSet(UserViewSet):
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
 
-    @action(detail=False,
-            permission_classes=(IsAuthenticated,))
-    def me(self, request, format=None):
-        return Response(self.serializer_class(request.user).data)
+    def get_permissions(self):
+        return ((IsAuthenticated(),) if self.action == 'me'
+                else super().get_permissions())
 
     @action(detail=False,
             permission_classes=(IsAuthenticated,),
@@ -115,11 +112,8 @@ class UserViewSet(UserViewSet):
             User.objects.filter(following__user=self.request.user)
         )
         page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, permission_classes=(IsAuthenticated,),
             methods=('post',))
@@ -135,9 +129,10 @@ class UserViewSet(UserViewSet):
     @subscribe.mapping.delete
     def unsubscribe(self, request, id):
         get_object_or_404(User, id=id)
-        if not Subscription.objects.filter(
-            user=request.user, author_id=id
-        ).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        Subscription.objects.filter(user=request.user, author=id).delete()
+        to_delete = Subscription.objects.filter(
+            user=request.user, author=id
+        ).delete()
+        if to_delete[0] == 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={'message': 'Объект не найден'})
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -5,7 +5,7 @@
 @email = email@email.ru
 @username = vasya
 @password = lili5555
-@vasyaToken = Token 4184729ec445927a9e65e79838134aed7a58ee18
+@vasyaToken = Token 16a11a3134abe682930e4f4f815aed2611a51377
 @anotherVasyaToken = Token 4bfa3e8667a02f738032b503b47b0692e52d3933
 
 
@@ -127,7 +127,7 @@ GET http://127.0.0.1:8000/api/recipes/?tags=obed
 Authorization: {{vasyaToken}}
 
 ### vasya GET recipe 200
-GET http://127.0.0.1:8000/api/recipes/120
+GET http://127.0.0.1:8000/api/recipes/34
 Authorization: {{vasyaToken}}
 
 ### vasya POST users/recipes/ 201
@@ -151,14 +151,14 @@ Content-Type: {{contentType}}
         2
     ],
     "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-    "name": "Нечто несъедобное (это не точно)",
+    "name": "2Нечто несъедобное (это не точно)",
     "text": "НЕ Приготовьте как нибудь эти ингредиеты",
     "cooking_time": 5
 }
 
-### anotherVasya PATCH recipe 200
-PATCH http://127.0.0.1:8000/api/recipes/139/
-Authorization: {{anotherVasyaToken}}
+### vasya PATCH recipe 200
+PATCH http://127.0.0.1:8000/api/recipes/69/
+Authorization: {{vasyaToken}}
 Content-Type: {{contentType}}
 
 {

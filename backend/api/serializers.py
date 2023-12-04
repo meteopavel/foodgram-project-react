@@ -1,18 +1,17 @@
 import base64
-import inspect
 
+from django.db.transaction import atomic
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from djoser.serializers import UserSerializer
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (CharField, CurrentUserDefault,
-                                        HiddenField, ModelSerializer,
-                                        ImageField, PrimaryKeyRelatedField,
-                                        SerializerMethodField, ReadOnlyField,
-                                        BooleanField)
+from rest_framework.serializers import (CurrentUserDefault, HiddenField,
+                                        ModelSerializer, ImageField,
+                                        PrimaryKeyRelatedField,
+                                        SerializerMethodField,
+                                        ReadOnlyField, BooleanField)
 from rest_framework.validators import UniqueTogetherValidator
 
-from api.utils import create_ingredients
 from api.validators import validate_empty_fields, validate_list
 from recipes.models import (Tag, Ingredient, Recipe, Favorite,
                             IngredientRecipe, ShoppingCart)
@@ -27,16 +26,23 @@ class IngredientSerializer(ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class IngredientRecipeSerializer(ModelSerializer):
-    id = PrimaryKeyRelatedField(source='ingredient.id',
-                                queryset=Ingredient.objects.all())
-    measurement_unit = CharField(source='ingredient.measurement_unit',
-                                 read_only=True)
-    name = CharField(source='ingredient.name', read_only=True)
+class IngredientRecipeGetSerializer(ModelSerializer):
+    id = ReadOnlyField(source='ingredient.id')
+    measurement_unit = ReadOnlyField(source='ingredient.measurement_unit')
+    name = ReadOnlyField(source='ingredient.name')
 
     class Meta:
         model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class IngredientRecipePostSerializer(ModelSerializer):
+    id = PrimaryKeyRelatedField(source='ingredient.id',
+                                queryset=Ingredient.objects.all())
+
+    class Meta:
+        model = IngredientRecipe
+        fields = ('id', 'amount')
 
 
 class TagSerializer(ModelSerializer):
@@ -57,7 +63,8 @@ class Base64ImageField(ImageField):
 class RecipeGetSerializer(ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer(read_only=True)
-    ingredients = SerializerMethodField()
+    ingredients = IngredientRecipeGetSerializer(source='ingredients_recipe',
+                                                many=True)
     image = Base64ImageField(required=False, allow_null=True)
     is_in_shopping_cart = BooleanField(default=0)
     is_favorited = BooleanField(default=0)
@@ -68,16 +75,12 @@ class RecipeGetSerializer(ModelSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
-    def get_ingredients(self, obj):
-        ingredients = IngredientRecipe.objects.filter(recipe_id=obj.id)
-        return IngredientRecipeSerializer(ingredients, many=True).data
-
 
 class RecipePostSerializer(ModelSerializer):
     tags = PrimaryKeyRelatedField(many=True,
                                   queryset=Tag.objects.all())
     author = HiddenField(default=CurrentUserDefault())
-    ingredients = IngredientRecipeSerializer(many=True)
+    ingredients = IngredientRecipePostSerializer(many=True)
     image = Base64ImageField(required=True)
 
     class Meta:
@@ -87,32 +90,42 @@ class RecipePostSerializer(ModelSerializer):
         read_only_fields = ('author',)
 
     def validate_tags(self, value):
-        validate_list(value, inspect.stack()[0][3])
+        validate_list(value, 'теги')
         return value
 
     def validate_ingredients(self, value):
         ingredients = [
             (value[i]['ingredient'])['id'] for i in range(len(value))
         ]
-        validate_list(ingredients, inspect.stack()[0][3])
+        validate_list(ingredients, 'ингредиенты')
         return value
 
+    def create_ingredients(self, recipe, ingredients):
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                recipe=recipe,
+                ingredient=(ingredient.get('ingredient'))['id'],
+                amount=ingredient.get('amount')
+            )
+
+    @atomic
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
-        create_ingredients(recipe, ingredients)
+        self.create_ingredients(recipe, ingredients)
         recipe.tags.set(tags)
         return recipe
 
+    @atomic
     def update(self, instance, validated_data):
         validate_empty_fields(validated_data)
         tags = validated_data.pop('tags')
         instance.tags.clear()
         instance.tags.set(tags)
         ingredients = validated_data.pop('ingredients')
-        IngredientRecipe.objects.filter(recipe=instance).delete()
-        create_ingredients(instance, ingredients)
+        instance.ingredients.clear()
+        self.create_ingredients(instance, ingredients)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):

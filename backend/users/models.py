@@ -3,28 +3,29 @@ from django.contrib.auth.models import AbstractUser
 
 from users.validators import validate_username
 
-MAX_LENGTH = 128
+MAX_NAME_LENGTH = 150
+MAX_EMAIL_LENGTH = 254
 
 
 class User(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя',
-        max_length=MAX_LENGTH,
+        max_length=MAX_NAME_LENGTH,
         unique=True,
         validators=(validate_username,)
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
-        max_length=MAX_LENGTH,
+        max_length=MAX_EMAIL_LENGTH,
         unique=True
     )
     first_name = models.CharField(
         verbose_name='Имя',
-        max_length=MAX_LENGTH,
+        max_length=MAX_NAME_LENGTH,
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
-        max_length=MAX_LENGTH,
+        max_length=MAX_NAME_LENGTH,
     )
     is_subscribed = models.BooleanField(
         'Подписан',

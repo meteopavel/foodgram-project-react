@@ -8,17 +8,6 @@ from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.response import Response
 
-from recipes.models import IngredientRecipe
-
-
-def create_ingredients(recipe, ingredients):
-    for ingredient in ingredients:
-        IngredientRecipe.objects.create(
-            recipe=recipe,
-            ingredient=(ingredient.get('ingredient'))['id'],
-            amount=ingredient.get('amount')
-        )
-
 
 def create_ingredients_list(ingredients):
     shopping_list = []
@@ -61,7 +50,8 @@ def create_related_object(pk, request, serializer_class):
 
 
 def delete_related_object(pk, request, model):
-    if not model.objects.filter(user=request.user, recipe=pk).exists():
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    model.objects.filter(user=request.user, recipe=pk).delete()
+    to_delete = model.objects.filter(user=request.user, recipe=pk).delete()
+    if to_delete[0] == 0:
+        return Response(status=status.HTTP_400_BAD_REQUEST,
+                        data={'message': 'Объект не найден'})
     return Response(status=status.HTTP_204_NO_CONTENT)

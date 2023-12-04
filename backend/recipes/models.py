@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -5,15 +6,20 @@ from django.db.models import OuterRef, Exists
 
 User = get_user_model()
 
+MAX_TAG_NAME_LENGTH = 256
+MAX_INGREDIENT_NAME_LENGTH = 256
+MAX_RECIPE_NAME_LENGTH = 200
+MAX_MEASUREMENT_UNIT_LENGTH = 50
+
 
 class RecipeQuerySet(models.QuerySet):
     def get_recipe_extra_obj(self, user):
         return self.annotate(
-            is_favorited=Exists(Favorite.objects.filter(
+            is_favorited=Exists(user.favorites.filter(
                 user_id=user.id,
                 recipe__id=OuterRef('id')
             )),
-            is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
+            is_in_shopping_cart=Exists(user.shoppingcarts.filter(
                 user_id=user.id,
                 recipe__id=OuterRef('id')
             ))
@@ -45,15 +51,16 @@ class UserRecipeBaseModel(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_TAG_NAME_LENGTH,
         unique=True,
         verbose_name='Название тега'
     )
-    color = models.CharField(
-        max_length=32,
+    color = ColorField(
+        unique=True,
         verbose_name='Цвет тега'
     )
     slug = models.SlugField(
+        unique=True,
         verbose_name='Slug тега'
     )
 
@@ -67,12 +74,12 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_INGREDIENT_NAME_LENGTH,
         unique=True,
         verbose_name='Название ингредиента'
     )
     measurement_unit = models.CharField(
-        max_length=10,
+        max_length=MAX_MEASUREMENT_UNIT_LENGTH,
         verbose_name='Единицы измерения'
     )
 
@@ -82,11 +89,17 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='%(app_label)s_%(class)s already exists',
+            )
+        ]
+        ordering = ('name',)
 
 
 class Recipe(models.Model):
     pub_date = models.DateTimeField('Дата', auto_now_add=True)
-    objects = RecipeQuerySet.as_manager()
     tags = models.ManyToManyField(
         Tag,
         through='TagRecipe'
@@ -101,24 +114,24 @@ class Recipe(models.Model):
         through='IngredientRecipe'
     )
     name = models.CharField(
-        max_length=200,
+        max_length=MAX_RECIPE_NAME_LENGTH,
         unique=True,
         verbose_name='Название рецепта'
     )
     image = models.ImageField(
         upload_to='recipes/images/',
-        null=True,
-        default=None,
         verbose_name='Изображение блюда'
     )
     text = models.TextField(
         verbose_name='Текст рецепта'
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         validators=(
             MinValueValidator(1, 'Время не может быть ниже 1'),),
         verbose_name='Время приготовления'
     )
+
+    objects = RecipeQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -148,8 +161,11 @@ class ShoppingCart(UserRecipeBaseModel):
 
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.IntegerField(
+    recipe = models.ForeignKey(
+        Recipe, related_name='ingredients_recipe',
+        on_delete=models.CASCADE
+    )
+    amount = models.PositiveSmallIntegerField(
         validators=(
             MinValueValidator(1, 'Количество не может быть ниже 1'),)
     )
