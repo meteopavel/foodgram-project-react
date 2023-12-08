@@ -1,0 +1,37 @@
+version: '3'
+
+volumes:
+  pg_data_production:
+  static_volume:
+  media_volume:
+
+services:
+  db:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data_production:/var/lib/postgresql/data
+  backend:
+    depends_on:
+      - db
+    image: meteopavel/foodgram_backend
+    env_file: .env
+    volumes:
+      - static_volume:/static
+      - media_volume:/app/media
+  frontend:
+    image: meteopavel/foodgram_frontend
+    env_file: .env
+    volumes:
+      - /frontend/:/app/result_build/
+  gateway:
+    depends_on:
+      - backend
+    image: meteopavel/foodgram_gateway
+    env_file: .env
+    volumes:
+      - /frontend/build:/usr/share/nginx/html/
+      - static_volume:/static
+      - media_volume:/media
+    ports:
+      - 10000:80
