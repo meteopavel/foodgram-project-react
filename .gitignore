@@ -132,6 +132,7 @@ dmypy.json
 .idea
 
 # Others
+.vscode
 node_modules
 media/
 todolist.txt
