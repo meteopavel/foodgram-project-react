@@ -22,7 +22,7 @@ def create_ingredients_list(ingredients):
 
 def get_pdf_shopping_list(items):
     buffer = io.BytesIO()
-    p = canvas.Canvas('media/recipes/shopping_lists/shopping_list.pdf')
+    p = canvas.Canvas(buffer)
     pdfmetrics.registerFont(TTFont('Lobster', 'static/Lobster-Regular.ttf'))
     pdfmetrics.registerFont(TTFont('AmaticSC', 'static/AmaticSC-Regular.ttf'))
     p.setFont('Lobster', 30)
