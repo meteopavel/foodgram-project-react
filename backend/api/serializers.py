@@ -1,20 +1,20 @@
 import base64
 
-from django.db.transaction import atomic
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from django.db.transaction import atomic
 from djoser.serializers import UserSerializer
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (CurrentUserDefault, HiddenField,
-                                        ModelSerializer, ImageField,
-                                        PrimaryKeyRelatedField,
-                                        SerializerMethodField,
-                                        ReadOnlyField, BooleanField)
+from rest_framework.serializers import (BooleanField, CurrentUserDefault,
+                                        HiddenField, ImageField,
+                                        ModelSerializer,
+                                        PrimaryKeyRelatedField, ReadOnlyField,
+                                        SerializerMethodField)
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.validators import validate_empty_fields, validate_list
-from recipes.models import (Tag, Ingredient, Recipe, Favorite,
-                            IngredientRecipe, ShoppingCart)
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
+                            ShoppingCart, Tag)
 from users.models import Subscription
 
 User = get_user_model()

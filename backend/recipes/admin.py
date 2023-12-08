@@ -3,8 +3,8 @@ from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
 from rest_framework.authtoken.admin import TokenProxy
 
-from .models import (Tag, Recipe, Ingredient, IngredientRecipe,
-                     ShoppingCart, TagRecipe)
+from .models import (Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag,
+                     TagRecipe)
 
 admin.site.empty_value_display = 'Не найдено'
 admin.site.unregister(TokenProxy)

@@ -1,7 +1,7 @@
-from django.db.models import Sum
 from django.contrib.auth import get_user_model
-from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -16,11 +16,10 @@ from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeGetSerializer, RecipePostSerializer,
                              ShoppingCartSerializer, SubscriptionSerializer,
                              SubscriptionsListSerializer, TagSerializer)
-from api.utils import (get_pdf_shopping_list,
-                       create_related_object,
-                       delete_related_object,)
-from recipes.models import (Favorite, Ingredient, IngredientRecipe,
-                            Recipe, ShoppingCart, Tag)
+from api.utils import (create_related_object, delete_related_object,
+                       get_pdf_shopping_list)
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
+                            ShoppingCart, Tag)
 from users.models import Subscription
 
 User = get_user_model()
