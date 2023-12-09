@@ -25,7 +25,7 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     volumes:
-      - /frontend/:/app/result_build/
+      - ./frontend/:/app/result_build/
   gateway:
     depends_on:
       - backend
@@ -34,7 +34,7 @@ services:
     ports:
       - 10000:80
     volumes:
-      - ./frontend/build:/usr/share/nginx/html/
-      - ./docs:/usr/share/nginx/html/api/docs/
+      - ./frontend/build/:/usr/share/nginx/html/
+      - ./docs/:/usr/share/nginx/html/api/docs/
       - static:/static
       - media:/media
