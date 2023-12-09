@@ -31,7 +31,7 @@ services:
     env_file: .env
     volumes:
       - ./frontend/build:/usr/share/nginx/html/
-      - ./docs:/usr/share/nginx/html/api/docs/
+      - ./docs/:/usr/share/nginx/html/api/docs/
       - static_volume:/static
       - media_volume:/media
     ports:
