@@ -1,6 +1,6 @@
 from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Exists, OuterRef
 
@@ -16,11 +16,9 @@ class RecipeQuerySet(models.QuerySet):
     def get_recipe_extra_obj(self, user):
         return self.annotate(
             is_favorited=Exists(user.favorites.filter(
-                user_id=user.id,
                 recipe__id=OuterRef('id')
             )),
             is_in_shopping_cart=Exists(user.shoppingcarts.filter(
-                user_id=user.id,
                 recipe__id=OuterRef('id')
             ))
         ).order_by('-pub_date')
@@ -75,7 +73,6 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         max_length=MAX_INGREDIENT_NAME_LENGTH,
-        unique=True,
         verbose_name='Название ингредиента'
     )
     measurement_unit = models.CharField(
@@ -127,7 +124,8 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         validators=(
-            MinValueValidator(1, 'Время не может быть ниже 1'),),
+            MaxValueValidator(1, 'Количество не может быть выше 32767'),
+            MinValueValidator(1, 'Количество не может быть ниже 1')),
         verbose_name='Время приготовления'
     )
 
@@ -167,7 +165,8 @@ class IngredientRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         validators=(
-            MinValueValidator(1, 'Количество не может быть ниже 1'),)
+            MaxValueValidator(1, 'Количество не может быть выше 32767'),
+            MinValueValidator(1, 'Количество не может быть ниже 1'))
     )
 
     class Meta:

@@ -9,7 +9,7 @@ def validate_empty_fields(validated_data):
 
 
 def validate_list(value, field):
-    if len(value) == 0:
+    if not value:
         raise ValidationError(f'Нужно добавить {field}!')
     elif len(set(value)) != len(value):
         raise ValidationError(f'Нельзя дублировать {field}!')

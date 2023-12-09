@@ -13,6 +13,15 @@
 пользователь регистрируется по электронной почте и паролю, отдельным запросом получает токен, 
 затем этот токен передаётся в заголовке каждого запроса.
 
+## Основные используемые инструменты
+* Python 3.10
+* Django
+* djangorestframework
+* Nginx
+* gunicorn
+* PostgreSQL
+* Docker
+
 ## Как развернуть проект на сервере
 * Клонировать репозиторий с проектом
 * Создать файл .env и заполнить его переменными по примеру из файла .env.example
@@ -20,14 +29,18 @@
 * Получить и настроить SSL-сертификат
 * Установить и настроить Docker
 
-## Основные используемые инструменты
-* Python
-* Django
-* djangorestframework
-* Nginx
-* gunicorn
-* PostgreSQL
-* Docker
+## Как развернуть проект локально
+* Клонировать репозиторий с проектом
+* Создать файл .env и заполнить его переменными по примеру из файла .env.example
+* Выполнить команды 
+```bash
+sudo docker compose -f docker-compose.yml up -d
+sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic --no-input
+sudo docker compose -f docker-compose.yml exec backend python manage.py import_data
+```
+Проект станет доступен по адресу 127.0.0.1:10000
+Документация по API будет доступна по эндпоинту /api/docs/ 
 
 ## Демо-версия Фудграм
 Демо-версия проекта доступна по адресу: https://foodgram.meteopavel.space/

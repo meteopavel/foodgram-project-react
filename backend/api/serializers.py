@@ -101,12 +101,12 @@ class RecipePostSerializer(ModelSerializer):
         return value
 
     def create_ingredients(self, recipe, ingredients):
-        for ingredient in ingredients:
-            IngredientRecipe.objects.create(
+            ingredients_recipe = [IngredientRecipe(
                 recipe=recipe,
                 ingredient=(ingredient.get('ingredient'))['id'],
                 amount=ingredient.get('amount')
-            )
+            ) for ingredient in ingredients]
+            IngredientRecipe.objects.bulk_create(ingredients_recipe)
 
     @atomic
     def create(self, validated_data):
